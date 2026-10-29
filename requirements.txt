@@ -1,0 +1,10 @@
+# Python 3.11. On Linux, the PyPI torch wheels include CUDA support; for a
+# different CUDA version see https://pytorch.org/get-started/locally/.
+torch
+numpy
+scipy        # per-cell Pearson/Spearman in evaluate.py
+tifffile
+tqdm
+matplotlib
+pandas       # analysis notebooks
+wandb        # optional; training logs to Weights & Biases unless --no-wandb

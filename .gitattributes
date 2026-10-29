@@ -1,0 +1,6 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Strip notebook outputs on commit (run `nbstripout --install` once per clone)
+*.ipynb filter=nbstripout
+*.ipynb diff=ipynb

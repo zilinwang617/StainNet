@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Data & large files (never commit raw images)
+data/
+/data
+sample_data/
+*.tif
+*.tiff
+
+# Training outputs & model weights
+logs/
+runs/
+local_runs/
+checkpoints/
+*.pt
+*.pth
+wandb/
+
+# Jupyter and local-only material (reports, helper scripts)
+.ipynb_checkpoints/
+local/
+
+# Secrets / environment
+.env
+.env.*
+
+# Editors, tools & OS
+.claude/
+.vscode/extensions.json
+.vscode/launch.json
+.idea/
+.DS_Store
+Thumbs.db
