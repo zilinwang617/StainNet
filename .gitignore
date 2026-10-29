@@ -32,8 +32,7 @@ local/
 
 # Editors, tools & OS
 .claude/
-.vscode/extensions.json
-.vscode/launch.json
+.vscode/
 .idea/
 .DS_Store
 Thumbs.db
