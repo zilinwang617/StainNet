@@ -5,6 +5,16 @@
 
 Predicting unmeasured protein stains from a small panel of cell-cycle markers in multiplexed single-cell fluorescence images.
 
+## Contents
+
+[Overview](#overview) · [Key results](#key-results) · [Method](#method) · [Evaluation](#evaluation) · [Results](#results) · [Repository structure](#repository-structure) · [How to run](#how-to-run) · [Data](#data) · [Acknowledgments](#acknowledgments) · [Usage](#usage)
+
+## Overview
+
+Multiplexed immunofluorescence can measure dozens of proteins per cell, but every extra antibody stain adds time, reagents, and imaging rounds. StainNet asks how much of that panel can be **predicted instead of measured**: given 7 input channels (cell-cycle markers plus a DNA stain) of a 59-channel single-cell image, a small U-Net predicts the spatial expression of one unmeasured protein. One model is trained per target, for 48 targets.
+
+If a target can be predicted well from the inputs, it may not need its own stain in future experiments.
+
 ## Key results
 
 - **48 targets** (41 proteins, 7 DNA-stain channels) predicted from 7 input channels, one TinyUNet per target, evaluated on **865 held-out cells**.
@@ -14,16 +24,6 @@ Predicting unmeasured protein stains from a small panel of cell-cycle markers in
 ![All 48 targets ranked by Pearson r of per-cell nuclear-median intensity, with a dashed line at r = 0.80](docs/figures/target_ranking_nuc_median_pearson.png)
 
 The DNA-stain channels are coloured separately because `DNA_1` is one of the inputs. The figure contains only per-target aggregates and can be regenerated with [`src/utilities/plot_target_ranking.py`](src/utilities/plot_target_ranking.py).
-
-## Contents
-
-[Overview](#overview) · [Method](#method) · [Evaluation](#evaluation) · [Results](#results) · [Repository structure](#repository-structure) · [How to run](#how-to-run) · [Data](#data) · [Acknowledgments](#acknowledgments) · [Usage](#usage)
-
-## Overview
-
-Multiplexed immunofluorescence can measure dozens of proteins per cell, but every extra antibody stain adds time, reagents, and imaging rounds. StainNet asks how much of that panel can be **predicted instead of measured**: given 7 input channels (cell-cycle markers plus a DNA stain) of a 59-channel single-cell image, a small U-Net predicts the spatial expression of one unmeasured protein. One model is trained per target, for 48 targets.
-
-If a target can be predicted well from the inputs, it may not need its own stain in future experiments.
 
 ## Method
 
