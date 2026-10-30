@@ -1,19 +1,23 @@
+<div align="center">
+
 # StainNet
+
+### Predicting unmeasured protein stains from a small panel of cell-cycle markers in multiplexed single-cell fluorescence images
 
 [![Python 3.11](https://img.shields.io/badge/python-3.11-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
 
-Predicting unmeasured protein stains from a small panel of cell-cycle markers in multiplexed single-cell fluorescence images.
+[Overview](#overview) · [Key results](#key-results) · [Method](#method) · [Evaluation](#evaluation) · [Results](#results) · [Repository structure](#repository-structure) · [Getting started](#getting-started) · [Data](#data) · [Acknowledgments](#acknowledgments) · [Usage](#usage)
 
-## Contents
-
-[Overview](#overview) · [Key results](#key-results) · [Method](#method) · [Evaluation](#evaluation) · [Results](#results) · [Repository structure](#repository-structure) · [How to run](#how-to-run) · [Data](#data) · [Acknowledgments](#acknowledgments) · [Usage](#usage)
+</div>
 
 ## Overview
 
-Multiplexed immunofluorescence can measure dozens of proteins per cell, but every extra antibody stain adds time, reagents, and imaging rounds. StainNet asks how much of that panel can be **predicted instead of measured**: given 7 input channels (cell-cycle markers plus a DNA stain) of a 59-channel single-cell image, a small U-Net predicts the spatial expression of one unmeasured protein. One model is trained per target, for 48 targets.
+Multiplexed immunofluorescence can measure dozens of proteins per cell, but every extra antibody stain adds time, reagents, and imaging rounds. StainNet asks how much of that panel can be **predicted instead of measured**: given 7 input channels (cell-cycle markers plus a DNA stain) of a 59-channel single-cell image, a small U-Net predicts the spatial expression of one unmeasured protein. One model is trained per target.
 
 If a target can be predicted well from the inputs, it may not need its own stain in future experiments.
+
+**Scope.** This is a research codebase built around one dataset rather than a general-purpose tool: the 59-channel layout and the 7-channel input panel are fixed in [`src/utilities/mapping.py`](src/utilities/mapping.py), the mask channels used for evaluation are fixed in [`src/evaluate.py`](src/evaluate.py), and the cell-level metrics assume single-cell crops. The approach itself (choose a small input panel, train one model per remaining marker, and judge predictions cell by cell) carries over to other multiplexed panels, and the code can serve as a reference for adapting it.
 
 ## Key results
 
@@ -23,7 +27,7 @@ If a target can be predicted well from the inputs, it may not need its own stain
 
 ![All 48 targets ranked by Pearson r of per-cell nuclear-median intensity, with a dashed line at r = 0.80](docs/figures/target_ranking_nuc_median_pearson.png)
 
-The DNA-stain channels are coloured separately because `DNA_1` is one of the inputs. The figure contains only per-target aggregates and can be regenerated with [`src/utilities/plot_target_ranking.py`](src/utilities/plot_target_ranking.py).
+*DNA-stain channels are coloured separately because `DNA_1` is one of the inputs. Only per-target aggregates are shown; the figure can be regenerated with [`plot_target_ranking.py`](src/utilities/plot_target_ranking.py).*
 
 ## Method
 
@@ -123,14 +127,12 @@ StainNet/
 │       ├── compute_dataset_stats.py
 │       ├── inspect_data.py
 │       └── plot_target_ranking.py # results figure
-├── slurm/                         # SLURM jobs (*.sbatch) and submit scripts
 ├── notebooks/                     # data validation, napari eval viewer, results analysis
 ├── docs/figures/                  # README figure
-├── download_eval_results.sh       # fetch summary.json/metrics.csv from a cluster
 └── requirements.txt
 ```
 
-## How to run
+## Getting started
 
 ### 1. Environment
 
@@ -178,43 +180,6 @@ Every script takes `--help`. Data paths can be overridden with `--manifest`, `--
 
 ```bash
 python src/infer.py --checkpoint runs/Akt_bc64/checkpoints/best.pt --input path/to/crops/
-```
-
-### 5. Full sweep on a SLURM cluster
-
-The scripts in `slurm/` keep the resource requests (per target: 1 GPU, 4 CPUs, 16 GB memory, 1–1.5 h time limit). Cluster-specific values come from environment variables:
-
-| Variable | Meaning | Default |
-|---|---|---|
-| `PROJECT_DIR` | project checkout on the cluster | the submit directory |
-| `PARTITION` | partition passed by the `submit_*.sh` scripts | cluster default |
-| `SCRATCH_ROOT` | node-local scratch for staging `data/` | `$TMPDIR` or `/tmp` |
-| `DATA_DIR`, `RUNS_DIR` | data and run directories | `$PROJECT_DIR/data`, `$PROJECT_DIR/runs` |
-| `CONDA_MODULE`, `CONDA_ENV` | conda module to load, env to activate | `anaconda`, `stainnet` |
-
-```bash
-mkdir -p logs
-python src/split.py                                             # split manifest (once)
-sbatch -p <cpu_partition> slurm/stats.sbatch                    # normalization stats
-PARTITION=<gpu_partition> SCRATCH_ROOT=<node_local_scratch> \
-    bash slurm/submit_all_targets.sh                            # train + test-eval all 48 targets
-```
-
-Each job trains one target and evaluates it on the test split into `runs/all_targets/<target>_<jobid>/eval/test/`. To copy only the result summaries back to a local machine:
-
-```bash
-CLUSTER=<user>@<cluster> bash download_eval_results.sh all_targets   # -> local_runs/all_targets/
-python src/utilities/plot_target_ranking.py --runs-dir local_runs/all_targets
-```
-
-### Notebook hygiene
-
-Notebook outputs are stripped on commit by an [nbstripout](https://github.com/kynan/nbstripout) git filter (see `.gitattributes`). Enable it once per clone:
-
-```bash
-pip install nbstripout
-nbstripout --install
-git config filter.nbstripout.clean "$(git config filter.nbstripout.clean) --keep-id"
 ```
 
 ## Data
